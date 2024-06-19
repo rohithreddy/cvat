@@ -726,7 +726,9 @@ def _OKS(a, b, sigma=0.1, bbox=None, scale=None, visibility_a=None, visibility_b
 
     dists = np.linalg.norm(p1 - p2, axis=1)
     return np.sum(
-        visibility_a * visibility_b * np.exp(-(dists**2) / (2 * scale * (2 * sigma) ** 2))
+        (visibility_a == visibility_b) * np.exp(
+            (visibility_a * visibility_b) * -(dists**2) / (2 * scale * (2 * sigma) ** 2)
+        )
     ) / np.sum(visibility_a | visibility_b, dtype=float)
 
 
@@ -744,8 +746,8 @@ class _KeypointsMatcher(dm.ops.PointsMatcher):
             b,
             sigma=self.sigma,
             bbox=bbox,
-            visibility_a=[v == dm.Points.Visibility.visible for v in a.visibility],
-            visibility_b=[v == dm.Points.Visibility.visible for v in b.visibility],
+            visibility_a=[v != dm.Points.Visibility.absent for v in a.visibility],
+            visibility_b=[v != dm.Points.Visibility.absent for v in b.visibility],
         )
 
 
